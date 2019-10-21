@@ -47,13 +47,27 @@ unsigned int GetProcId(std::string window_name)
 	return pid;
 }
 
+void AssureDllExists(std::string path)
+{
+	bool dll_exists = std::filesystem::exists(path);
+	if (!dll_exists)
+		throw std::exception("The DLL path doesn't exist.");
+}
+
 int main(int argc, char** argv)
 {
+	std::string injector_path = argv[0], window_name = argv[1], dll_path = argv[2];
+
 	if (argc != 3)
-		std::cout << "Usage: " << std::filesystem::path(argv[0]).filename().string() << " <Window Name> <DLL Path>";
+		std::cout << "Usage: " << std::filesystem::path(injector_path).filename().string() << " <Window Name> <DLL Path>";
 	else
 	{
-		try { InjectDLL(GetProcId(argv[1]), argv[2]); }
+		try
+		{
+			unsigned int proc_id = GetProcId(window_name);
+			AssureDllExists(dll_path);
+			InjectDLL(proc_id, dll_path);
+		}
 		catch (std::exception & ex) { std::cerr << ex.what(); }
 	}
 }
